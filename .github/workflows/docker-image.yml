@@ -25,14 +25,17 @@ jobs:
           JF_URL: https://${{ vars.JF_URL }}/
         with:
           oidc-provider-name: hs-dynamic
-
-      - name: Run JFrog Scan
+          
+      - name: Run JFrog Scan and Publish
         run: |
           # 1. Pull the image
           jf docker pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
-          
-          # 2. Scan the image. 
-          # Note: We use the full tag. 
-          # Adding --fail=false ensures the job finishes so you can see the summary 
-          # even if vulnerabilities are found.
-          jf docker scan hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --fail=false
+
+          # 2. Create the Build Info 
+          jf rt build-docker-create hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --build-name="docker-ci" --build-number=${{ github.run_number }}
+
+          # 3. Publish Build Info 
+          jf rt build-publish "docker-ci" ${{ github.run_number }}
+
+          # 4. Scan the Build 
+          jf build-scan "docker-ci" ${{ github.run_number }}
