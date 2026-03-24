@@ -1,0 +1,37 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+  id-token: write
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:latest
+
+      
+    - name: Set up JFrog CLI
+      uses: jfrog/setup-jfrog-cli@v4   # This must be indented correctly under the step
+      env:
+        JF_URL: "https://idani.jfrog.io" # This must be under `env` as well
+      with:
+        oidc-provider-name: davidka
+        
+      
+    - name: Run JFrog CLI
+      run: |
+          # Ping the server
+          jf rt ping
+          # Collect environment variables for the build
+          jf docker scan my-image-name:latest --project=xray-test
