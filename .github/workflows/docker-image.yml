@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  
+  workflow_dispatch: 
 
 permissions:
   contents: write
@@ -24,19 +26,13 @@ jobs:
         with:
           oidc-provider-name: hs-dynamic
 
-      - name: Run JFrog Scan and Publish
+      - name: Run JFrog Scan
         run: |
-          # 1. Ping to verify connection
-          jf rt ping
-
-          # 2. Pull the image
+          # 1. Pull the image
           jf docker pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
-
-          # 3. Record the image as part of a "Build" (This is the key for the summary)
-          jf rt build-docker-create hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --build-name=${{ github.run_id }} --build-number=${{ github.run_number }}
-
-          # 4. Publish the Build Info to Artifactory
-          jf rt build-publish ${{ github.run_id }} ${{ github.run_number }}
-
-          # 5. Scan the Build (This triggers the GitHub Summary UI)
-          jf build-scan ${{ github.run_id }} ${{ github.run_number }}
+          
+          # 2. Scan the image. 
+          # Note: We use the full tag. 
+          # Adding --fail=false ensures the job finishes so you can see the summary 
+          # even if vulnerabilities are found.
+          jf docker scan hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --fail=false
