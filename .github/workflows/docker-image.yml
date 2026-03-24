@@ -9,29 +9,34 @@ on:
 permissions:
   contents: write
   id-token: write
+
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-  #  - name: Build the Docker image
-  #    run: docker build . --file Dockerfile --tag my-image-name:latest
+      - uses: actions/checkout@v4
 
-      
-    - name: Set up JFrog CLI
-      uses: jfrog/setup-jfrog-cli@v4   # This must be indented correctly under the step
-      env:
-        JF_URL: https://${{ vars.JF_URL }}/
-      with:
-        oidc-provider-name: hs-dynamic
-        
-      
-    - name: Run JFrog CLI
-      run: |
-          # Ping the server
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: https://${{ vars.JF_URL }}/
+        with:
+          oidc-provider-name: hs-dynamic
+
+      - name: Run JFrog Scan and Publish
+        run: |
+          # 1. Ping to verify connection
           jf rt ping
+
+          # 2. Pull the image
           jf docker pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
-          jf docker scan hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
+
+          # 3. Record the image as part of a "Build" (This is the key for the summary)
+          jf rt build-docker-create hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --build-name=${{ github.run_id }} --build-number=${{ github.run_number }}
+
+          # 4. Publish the Build Info to Artifactory
+          jf rt build-publish ${{ github.run_id }} ${{ github.run_number }}
+
+          # 5. Scan the Build (This triggers the GitHub Summary UI)
+          jf build-scan ${{ github.run_id }} ${{ github.run_number }}
