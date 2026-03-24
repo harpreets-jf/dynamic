@@ -24,9 +24,9 @@ jobs:
     - name: Set up JFrog CLI
       uses: jfrog/setup-jfrog-cli@v4   # This must be indented correctly under the step
       env:
-        JF_URL: "https://idani.jfrog.io" # This must be under `env` as well
+        JF_URL: https://${{ vars.JF_URL }}/
       with:
-        oidc-provider-name: davidka
+        oidc-provider-name: hs-dynamic
         
       
     - name: Run JFrog CLI
