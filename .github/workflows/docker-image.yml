@@ -17,8 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:latest
+  #  - name: Build the Docker image
+  #    run: docker build . --file Dockerfile --tag my-image-name:latest
 
       
     - name: Set up JFrog CLI
@@ -33,5 +33,5 @@ jobs:
       run: |
           # Ping the server
           jf rt ping
-          # Collect environment variables for the build
-          jf docker scan my-image-name:latest --project=xray-test
+          jf docker pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
+          jf docker scan hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm
