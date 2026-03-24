@@ -29,7 +29,7 @@ jobs:
       - name: Run JFrog Scan and Publish
         run: |
           # 1. Pull the image
-          jf rt docker-pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm hts2-hs-dock-demo-docker-local --build-name="docker-ci" --build-number=${{ github.run_number }}
+          jf docker pull hts2-hs-dock-demo-docker-local.jfrog.io/memcached:bookworm --build-name="docker-ci" --build-number=${{ github.run_number }}
 
           
           # 2. Publish Build Info 
